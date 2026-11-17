@@ -34,7 +34,8 @@ STORES = [(1, "Sur", "Tacna"), (2, "Sur", "Arequipa"), (3, "Centro", "Lima"), (4
 def main():
     rng = random.Random(SEED)
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    with duckdb.connect() as db:
+    with duckdb.connect(config={"threads": 1}) as db:
+        print("Generando dimensiones y hechos…", flush=True)
         db.execute("""
             create table dim_date (
                 date_id integer primary key, sale_date date not null,
@@ -86,12 +87,13 @@ def main():
                    unnest(?::decimal(14,2)[])
         """, list(zip(*rows)))
         db.commit()
+        print("Exportando las cuatro tablas a Parquet…", flush=True)
         for table in ("dim_date", "dim_product", "dim_store", "fact_sales"):
             target = str(OUTPUT / f"{table}.parquet").replace("'", "''")
             db.execute(f"copy {table} to '{target}' (format parquet, compression zstd)")
 
     # Use exactly the schema and query generator consumed by the browser.
-    with duckdb.connect() as db:
+    with duckdb.connect(config={"threads": 1}) as db:
         schema = (ROOT / "public" / "schema.sql").read_text(encoding="utf-8")
         for table in ("dim_date", "dim_product", "dim_store", "fact_sales"):
             path = str(OUTPUT / f"{table}.parquet").replace("'", "''")

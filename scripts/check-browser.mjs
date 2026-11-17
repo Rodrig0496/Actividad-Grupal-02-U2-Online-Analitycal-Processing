@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
 import { chromium } from '@playwright/test';
 
 const url = process.env.APP_URL || 'http://127.0.0.1:4173';
@@ -16,6 +17,8 @@ try {
   });
   const readInteger = async selector => Number((await page.locator(selector).innerText()).replace(/\D/g, ''));
   assert.equal(await readInteger('#sale-lines'), manifest.rows);
+  assert.equal(await readInteger('#units'), manifest.units);
+  assert.equal(Number((await page.locator('#revenue').innerText()).replace(/[^\d.-]/g, '')), Number(manifest.revenue));
   assert.equal(await page.locator('#results tbody tr').count(), 24);
   const initialRevenue = await page.locator('#revenue').innerText();
   await page.locator('select[name=year]').selectOption('2025');
@@ -47,8 +50,11 @@ try {
   await page.locator('#rollup-tab').click();
   await page.waitForFunction(() => !document.querySelector('#rollup-tab').disabled);
   assert.equal(await page.locator('#operation tbody tr').count(), 11);
+  await mkdir('test-results', { recursive: true });
+  await page.screenshot({ path: 'test-results/desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.screenshot({ path: 'test-results/mobile.png', fullPage: true });
   assert.deepEqual(errors, []);
   console.log('OK DuckDB-Wasm, filtros, drill-down, roll-up, pivot, CSV, reset y ancho móvil');
 } finally {
