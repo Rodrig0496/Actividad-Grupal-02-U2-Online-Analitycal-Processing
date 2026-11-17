@@ -7,6 +7,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ acceptDownloads: true });
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
+await mkdir('test-results', { recursive: true });
 
 try {
   await page.goto(url, { waitUntil: 'networkidle' });
@@ -29,7 +30,7 @@ try {
   await page.waitForFunction(() => !document.querySelector('#controls').disabled);
   await page.locator('select[name=category]').selectOption('Tecnología');
   await page.waitForFunction(() => !document.querySelector('#controls').disabled);
-  assert.ok((await page.locator('#detail-sql').innerText()).includes("region = 'Sur'"));
+  assert.ok((await page.locator('#detail-sql').textContent()).includes("region = 'Sur'"));
   await page.locator('select[name=dimension]').selectOption('city');
   await page.waitForFunction(() => !document.querySelector('#controls').disabled);
   assert.equal(await page.locator('#results tbody tr').count(), 2);
@@ -50,13 +51,18 @@ try {
   await page.locator('#rollup-tab').click();
   await page.waitForFunction(() => !document.querySelector('#rollup-tab').disabled);
   assert.equal(await page.locator('#operation tbody tr').count(), 11);
-  await mkdir('test-results', { recursive: true });
   await page.screenshot({ path: 'test-results/desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.screenshot({ path: 'test-results/mobile.png', fullPage: true });
   assert.deepEqual(errors, []);
   console.log('OK DuckDB-Wasm, filtros, drill-down, roll-up, pivot, CSV, reset y ancho móvil');
+} catch (error) {
+  console.log('Estado de la aplicación:', await page.locator('#status').textContent());
+  console.log('Consulta actual:', await page.locator('#detail-sql').textContent());
+  console.log('Errores del navegador:', errors);
+  await page.screenshot({ path: 'test-results/failure.png', fullPage: true });
+  throw error;
 } finally {
   await browser.close();
 }

@@ -46,6 +46,7 @@ jobs:
           done
           npm run test:browser
       - name: Guardar capturas de la prueba
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: interfaz-olap
