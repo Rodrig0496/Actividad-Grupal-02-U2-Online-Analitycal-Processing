@@ -141,7 +141,7 @@ async function refresh() {
 
 form.addEventListener('submit', event => event.preventDefault());
 form.addEventListener('change', refresh);
-document.querySelector('#reset').addEventListener('click', () => { form.reset(); refresh(); });
+document.querySelector('#reset-filters').addEventListener('click', () => { form.reset(); refresh(); });
 for (const [button, view] of [[rollupButton, 'rollup'], [pivotButton, 'pivot']]) {
   button.addEventListener('click', async () => {
     setBusy(true);

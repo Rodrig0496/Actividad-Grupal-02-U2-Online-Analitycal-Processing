@@ -44,7 +44,7 @@ try {
   const download = await downloadPromise;
   assert.equal(download.suggestedFilename(), 'ventas-seleccion.csv');
   assert.equal(await download.failure(), null);
-  await page.locator('#reset').click();
+  await page.locator('#reset-filters').click();
   await page.waitForFunction(() => !document.querySelector('#controls').disabled);
   assert.equal(await readInteger('#sale-lines'), manifest.rows);
   assert.equal(await page.locator('#revenue').innerText(), initialRevenue);
