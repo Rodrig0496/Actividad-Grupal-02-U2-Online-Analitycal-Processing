@@ -1,11 +1,13 @@
 """Generate deterministic educational sales data and validate the OLAP model."""
 
+import csv
 import json
 import random
 import subprocess
 from datetime import date, timedelta
 from decimal import Decimal
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import duckdb
 
@@ -79,13 +81,12 @@ def main():
             revenue = Decimal(price_cents * quantity * (100 - discount_percent)) / 10_000
             cost = Decimal(cost_cents * quantity) / 100
             rows.append((sale_id, int(day.strftime("%Y%m%d")), product_id, store_id, quantity, revenue, cost))
-        db.execute("""
-            insert into fact_sales
-            select unnest(?::integer[]), unnest(?::integer[]),
-                   unnest(?::integer[]), unnest(?::integer[]),
-                   unnest(?::integer[]), unnest(?::decimal(14,2)[]),
-                   unnest(?::decimal(14,2)[])
-        """, list(zip(*rows)))
+        with TemporaryDirectory(prefix="olap-load-") as temp_dir:
+            csv_path = Path(temp_dir) / "facts.csv"
+            with csv_path.open("w", newline="", encoding="utf-8") as stream:
+                csv.writer(stream).writerows(rows)
+            escaped_path = str(csv_path).replace("'", "''")
+            db.execute(f"copy fact_sales from '{escaped_path}' (format csv, header false)")
         db.commit()
         print("Exportando las cuatro tablas a Parquet…", flush=True)
         for table in ("dim_date", "dim_product", "dim_store", "fact_sales"):
