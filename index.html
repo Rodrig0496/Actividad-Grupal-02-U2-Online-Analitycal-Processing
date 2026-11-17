@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explora un modelo estrella de ventas simuladas con DuckDB y consultas OLAP interactivas.">
+    <title>Ventas Perú · Explorador OLAP</title>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="brand" href="./">Ventas Perú <span>OLAP</span></a>
+      <a class="source" href="https://github.com/Rodrig0496/Actividad-Grupal-02-U2-Online-Analitycal-Processing">Ver repositorio ↗</a>
+    </header>
+    <main>
+      <div class="intro">
+        <div><p class="eyebrow">2024–2025 · Datos simulados</p><h1>Una venta.<br>Muchas perspectivas.</h1></div>
+        <p class="lead">Explora 48.000 líneas de venta por tiempo, región y producto. Cada filtro ejecuta una consulta SQL en DuckDB, dentro de tu navegador.</p>
+      </div>
+      <p id="status" class="status" role="status">Iniciando el motor analítico… La primera carga descarga el motor WebAssembly.</p>
+      <form id="filters" aria-label="Filtros de análisis">
+        <fieldset id="controls" disabled>
+          <label>Año<select name="year"><option value="">Todos los años</option><option>2024</option><option>2025</option></select></label>
+          <label>Región<select name="region"><option value="">Todas las regiones</option><option>Sur</option><option>Centro</option><option>Norte</option></select></label>
+          <label>Categoría<select name="category"><option value="">Todas las categorías</option><option>Tecnología</option><option>Hogar</option><option>Deportes</option></select></label>
+          <label>Agrupar por<select name="dimension"><option value="year">Año</option><option value="quarter">Trimestre</option><option value="month" selected>Mes</option><option value="region">Región</option><option value="city">Ciudad</option><option value="category">Categoría</option><option value="product">Producto</option></select></label>
+          <button id="reset" type="button" class="secondary">Restablecer</button>
+        </fieldset>
+      </form>
+      <section aria-label="Indicadores de la selección" class="metrics">
+        <div><h2>Ingresos</h2><p id="revenue">—</p></div>
+        <div><h2>Utilidad bruta</h2><p id="profit">—</p></div>
+        <div><h2>Unidades</h2><p id="units">—</p></div>
+        <div><h2>Líneas de venta</h2><p id="sale-lines">—</p></div>
+      </section>
+      <section class="panel" aria-labelledby="result-heading">
+        <div class="panel-header"><div><h2 id="result-heading">Ingresos por mes</h2><p id="result-caption">Selecciona una dimensión para cambiar la perspectiva.</p></div><button id="export" class="secondary" disabled>Descargar CSV</button></div>
+        <div id="chart" class="chart" aria-label="Gráfico de ingresos"></div>
+        <div class="table-scroll" tabindex="0" aria-label="Resultados del análisis"><table id="results"><thead></thead><tbody></tbody></table></div>
+      </section>
+      <section class="panel" aria-labelledby="operations-heading">
+        <div class="panel-header"><div><h2 id="operations-heading">Operaciones OLAP</h2><p>Los filtros se aplican también a los subtotales y a la tabla cruzada.</p></div></div>
+        <div class="tabs" role="group" aria-label="Elegir operación"><button id="rollup-tab" aria-pressed="true" disabled>Roll-up · Año y trimestre</button><button id="pivot-tab" aria-pressed="false" disabled>Pivot · Región y categoría</button></div>
+        <div class="table-scroll" tabindex="0" aria-label="Resultados de la operación OLAP"><table id="operation"><thead></thead><tbody></tbody></table></div>
+      </section>
+      <details class="sql-panel"><summary>Ver las consultas SQL ejecutadas</summary><h3>Análisis por dimensión</h3><pre id="detail-sql"></pre><h3 id="operation-sql-heading">Roll-up</h3><pre id="operation-sql"></pre></details>
+      <section class="guide" aria-labelledby="guide-heading"><h2 id="guide-heading">Explora el modelo</h2><div>
+        <p><strong>Drill-down y roll-up.</strong> Cambia «Agrupar por» de año a trimestre o mes para desglosar el tiempo. Elige región y luego ciudad para detallar la ubicación.</p>
+        <p><strong>Slice y dice.</strong> Filtra un año para obtener una sección del conjunto. Combina año, región y categoría para analizar un subconjunto con varias dimensiones.</p>
+        <p><strong>Modelo estrella.</strong> Una tabla de hechos contiene cantidades, ingresos y costos. Tres dimensiones describen fecha, producto y tienda. Los importes se expresan en soles.</p>
+      </div></section>
+    </main>
+    <footer>Datos sintéticos generados con semilla fija · DuckDB-Wasm · GitHub Pages</footer>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
